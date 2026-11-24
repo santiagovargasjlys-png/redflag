@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.O.S. Alerta Cyberpunk</title>
+    <style>
+        :root {
+            --bg-dark: #0b0c14;
+            --card-bg: #131524;
+            --input-bg: #1c1f33;
+            --neon-cyan: #00f2fe;
+            --neon-green: #00e676;
+            --neon-blue: #0088ff;
+            --neon-pink: #ff2a6d;
+            --text-main: #ffffff;
+            --text-muted: #8b92b2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 15px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(106, 17, 203, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.1) 0%, transparent 40%);
+        }
+
+        /* Estado GPS */
+        .status-pill {
+            background: linear-gradient(90deg, #2a164b, #4a1c7a);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* Tarjeta de Contactos */
+        .contacts-container {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .header-title span.cyan { color: var(--neon-cyan); }
+        .header-title span.pink { color: var(--neon-pink); }
+
+        .contact-item {
+            margin-bottom: 18px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .contact-item:last-of-type {
+            border-bottom: none;
+            margin-bottom: 10px;
+        }
+
+        .contact-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .input-action-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .phone-input {
+            flex: 1;
+            min-width: 0;
+            background-color: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .phone-input:focus {
+            border-color: var(--neon-cyan);
+        }
+
+        .phone-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Botones WhatsApp y Mensajes */
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #00f2fe 0%, #00e676 100%);
+            color: #051b11;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.35);
+        }
+
+        .btn-sms {
+            background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            box-shadow: 0 0 12px rgba(0, 114, 255, 0.35);
+        }
+
+        .btn-add-contact {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(0, 242, 254, 0.4);
+            color: var(--neon-cyan);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .btn-add-contact:hover {
+            background-color: rgba(0, 242, 254, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-pill" id="statusPill">
+        Estado: Buscando ubicación...
+    </div>
+
+    <div class="contacts-container">
+        <div class="header-title">
+            📞 <span class="cyan">Contactos de</span> <span class="pink">Emergencia</span>
+        </div>
+
+        <div id="contactsList">
+            <!-- Contacto 1 -->
+            <div class="contact-item">
+                <label class="contact-label">NÚMERO 1:</label>
+                <div class="input-action-row">
+                    <input type="tel" class="phone-input" id="phone-1" placeholder="Ej. 2215925394" oninput="guardarContactos()">
+                    <button class="btn btn-whatsapp" onclick="enviarAlerta(1, 'whatsapp')">WhatsApp</button>
+                    <button class="btn btn-sms" onclick="enviarAlerta(1, 'sms')">Mensajes</button>
+                </div>
+            </div>
+
+            <!-- Contacto 2 -->
+            <div class="contact-item">
+                <label class="contact-label">NÚMERO 2:</label>
+                <div class="input-action-row">
+                    <input type="tel" class="phone-input" id="phone-2" placeholder="Segundo contacto" oninput="guardarContactos()">
+                    <button class="btn btn-whatsapp" onclick="enviarAlerta(2, 'whatsapp')">WhatsApp</button>
+                    <button class="btn btn-sms" onclick="enviarAlerta(2, 'sms')">Mensajes</button>
+                </div>
+            </div>
+
+            <!-- Contacto 3 -->
+            <div class="contact-item">
+                <label class="contact-label">NÚMERO 3:</label>
+                <div class="input-action-row">
+                    <input type="tel" class="phone-input" id="phone-3" placeholder="Tercer contacto" oninput="guardarContactos()">
+                    <button class="btn btn-whatsapp" onclick="enviarAlerta(3, 'whatsapp')">WhatsApp</button>
+                    <button class="btn btn-sms" onclick="enviarAlerta(3, 'sms')">Mensajes</button>
+                </div>
+            </div>
+
+            <!-- Contacto 4 -->
+            <div class="contact-item">
+                <label class="contact-label">NÚMERO 4:</label>
+                <div class="input-action-row">
+                    <input type="tel" class="phone-input" id="phone-4" placeholder="Cuarto contacto" oninput="guardarContactos()">
+                    <button class="btn btn-whatsapp" onclick="enviarAlerta(4, 'whatsapp')">WhatsApp</button>
+                    <button class="btn btn-sms" onclick="enviarAlerta(4, 'sms')">Mensajes</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-add-contact" onclick="agregarContacto()">+ Agregar otro número</button>
+    </div>
+
+    <script>
+        let latitudActual = null;
+        let longitudActual = null;
+        let totalContactos = 4;
+
+        window.onload = function() {
+            cargarContactos();
+            actualizarGPS();
+        };
+
+        function actualizarGPS() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        latitudActual = pos.coords.latitude;
+                        longitudActual = pos.coords.longitude;
+                        document.getElementById("statusPill").innerText = "Estado: Ubicación GPS lista ✓";
+                    },
+                    (err) => {
+                        document.getElementById("statusPill").innerText = "Estado: Activa tu GPS y da permisos";
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                document.getElementById("statusPill").innerText = "Estado: GPS no soportado";
+            }
+        }
+
+        function enviarAlerta(index, tipo) {
+            const input = document.getElementById(`phone-${index}`);
+            const numero = input.value.replace(/\D/g, '');
+
+            if (!numero) {
+                alert(`Por favor ingresa un número válido en el NÚMERO ${index}.`);
+                input.focus();
+                return;
+            }
+
+            let ubicacionTexto = "Ubicación no disponible (activa el GPS)";
+            if (latitudActual && longitudActual) {
+                ubicacionTexto = `https://maps.google.com/?q=${latitudActual},${longitudActual}`;
+            }
+
+            const mensaje = encodeURIComponent(`¡ALERTA S.O.S.! Necesito ayuda urgente. Mi ubicación actual es: ${ubicacionTexto}`);
+
+            if (tipo === 'whatsapp') {
+                const numeroCompleto = numero.length === 10 ? `52${numero}` : numero;
+                window.open(`https://wa.me/${numeroCompleto}?text=${mensaje}`, '_blank');
+            } else if (tipo === 'sms') {
+                window.location.href = `sms:${numero}?body=${mensaje}`;
+            }
+        }
+
+        function agregarContacto() {
+            totalContactos++;
+            const lista = document.getElementById("contactsList");
+            const nuevoItem = document.createElement("div");
+            nuevoItem.className = "contact-item";
+            nuevoItem.innerHTML = `
+                <label class="contact-label">NÚMERO ${totalContactos}:</label>
+                <div class="input-action-row">
+                    <input type="tel" class="phone-input" id="phone-${totalContactos}" placeholder="Contacto adicional" oninput="guardarContactos()">
+                    <button class="btn btn-whatsapp" onclick="enviarAlerta(${totalContactos}, 'whatsapp')">WhatsApp</button>
+                    <button class="btn btn-sms" onclick="enviarAlerta(${totalContactos}, 'sms')">Mensajes</button>
+                </div>
+            `;
+            lista.appendChild(nuevoItem);
+        }
+
+        function guardarContactos() {
+            const datos = [];
+            for (let i = 1; i <= totalContactos; i++) {
+                const el = document.getElementById(`phone-${i}`);
+                if (el) datos.push(el.value);
+            }
+            localStorage.setItem("sos_contactos", JSON.stringify(datos));
+        }
+
+        function cargarContactos() {
+            const guardados = JSON.parse(localStorage.getItem("sos_contactos") || "[]");
+            guardados.forEach((num, idx) => {
+                const index = idx + 1;
+                if (index > totalContactos) agregarContacto();
+                const el = document.getElementById(`phone-${index}`);
+                if (el) el.value = num;
+            });
+        }
+    </script>
+</body>
+</html>
